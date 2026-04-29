@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getWorkingDays, addWorkingDay, deleteWorkingDay, getProperties, getResources, createResource, updateResource, deleteResource, uploadImage, deleteImageApi, getImageUrl } from '../api/client'
+import { getWorkingDays, addWorkingDay, deleteWorkingDay, getProperties, getResources, getResource, createResource, updateResource, deleteResource, uploadImage, deleteImageApi, getImageUrl } from '../api/client'
 import styles from './AdminPage.module.css'
 
 // ── Mini calendar ──────────────────────────────────────────────────────────
@@ -208,14 +208,18 @@ function ResourcesSection({ flash }) {
   }
 
   async function handleEdit(id) {
-    const res = resources.find(r => r.id === id)
-    if (!res) return
-    setEditId(id)
-    setEditName(res.name)
-    setEditShortDesc(res.shortDescription || '')
-    setEditFullDesc(res.fullDescription || '')
-    setEditPrice(String(res.pricePerHour || ''))
-    setEditImagesIds(res.imagesIds || [])
+    try {
+      const res = await getResource(id)
+      if (!res) return
+      setEditId(id)
+      setEditName(res.name)
+      setEditShortDesc(res.shortDescription || '')
+      setEditFullDesc(res.fullDescription || '')
+      setEditPrice(String(res.pricePerHour || ''))
+      setEditImagesIds(res.imagesIds || [])
+    } catch (err) {
+      flash('Ошибка загрузки данных помещения', false)
+    }
   }
 
   async function handleSaveEdit(e) {
