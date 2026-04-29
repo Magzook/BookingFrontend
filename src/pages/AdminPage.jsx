@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getWorkingDays, addWorkingDay, deleteWorkingDay, getProperties, getResources, createResource, updateResource, deleteResource } from '../api/client'
+import { getWorkingDays, addWorkingDay, deleteWorkingDay, getProperties, getResources, createResource, updateResource, deleteResource, uploadImage, deleteImageApi, getImageUrl } from '../api/client'
 import styles from './AdminPage.module.css'
 
 // ── Mini calendar ──────────────────────────────────────────────────────────
@@ -118,6 +118,8 @@ function ResourcesSection({ flash }) {
   const [pricePerHour, setPricePerHour]         = useState('')
   const [propertiesIds, setPropertiesIds]       = useState([])
   const [allProperties, setAllProperties]       = useState([])
+  const [imagesIds, setImagesIds]               = useState([])
+  const [uploading, setUploading]               = useState(false)
   
   // Edit state
   const [editId, setEditId]         = useState(null)
@@ -125,12 +127,41 @@ function ResourcesSection({ flash }) {
   const [editShortDesc, setEditShortDesc] = useState('')
   const [editFullDesc, setEditFullDesc]   = useState('')
   const [editPrice, setEditPrice]         = useState('')
+  const [editImagesIds, setEditImagesIds] = useState([])
 
   async function load() {
     getResources().then(setResources).finally(() => setLoading(false))
     getProperties().then(setAllProperties)
   }
   useEffect(() => { load() }, [])
+
+  async function handleImageUpload(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const data = await uploadImage(file)
+      setImagesIds(prev => [...prev, data.id])
+      flash('Изображение загружено')
+    } catch (err) {
+      flash(err.msg ?? 'Ошибка загрузки изображения', false)
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
+  }
+
+  function removeImage(index) {
+    setImagesIds(prev => prev.filter((_, i) => i !== index))
+  }
+
+  function moveImage(index, direction) {
+    const newImages = [...imagesIds]
+    const temp = newImages[index]
+    newImages[index] = newImages[index + direction]
+    newImages[index + direction] = temp
+    setImagesIds(newImages)
+  }
 
   async function handleCreate(e) {
     e.preventDefault()
@@ -140,10 +171,10 @@ function ResourcesSection({ flash }) {
         shortDescription,
         fullDescription,
         pricePerHour: parseInt(pricePerHour, 10),
-        imagesIds: [],
+        imagesIds,
         propertiesIds
       })
-      setResources(prev => [...prev, { id: data.id, name, shortDescription, fullDescription, pricePerHour: parseInt(pricePerHour, 10) }])
+      setResources(prev => [...prev, { id: data.id, name, shortDescription, fullDescription, pricePerHour: parseInt(pricePerHour, 10), imagesIds }])
       resetForm()
       flash('Помещение создано')
     } catch (err) {
@@ -166,6 +197,7 @@ function ResourcesSection({ flash }) {
     setFullDescription('')
     setPricePerHour('')
     setPropertiesIds([])
+    setImagesIds([])
     setShowForm(false)
   }
 
@@ -183,6 +215,7 @@ function ResourcesSection({ flash }) {
     setEditShortDesc(res.shortDescription || '')
     setEditFullDesc(res.fullDescription || '')
     setEditPrice(String(res.pricePerHour || ''))
+    setEditImagesIds(res.imagesIds || [])
   }
 
   async function handleSaveEdit(e) {
@@ -196,7 +229,7 @@ function ResourcesSection({ flash }) {
       })
       setResources(prev => prev.map(r => 
         r.id === editId 
-          ? { ...r, name: editName, shortDescription: editShortDesc, fullDescription: editFullDesc, pricePerHour: editPrice ? parseInt(editPrice, 10) : r.pricePerHour }
+          ? { ...r, name: editName, shortDescription: editShortDesc, fullDescription: editFullDesc, pricePerHour: editPrice ? parseInt(editPrice, 10) : r.pricePerHour, imagesIds: editImagesIds }
           : r
       ))
       setEditId(null)
@@ -210,6 +243,34 @@ function ResourcesSection({ flash }) {
         '-7': 'Помещение с таким названием уже существует'
       }
       flash(ERRORS[String(err.status)] ?? err.msg ?? 'Ошибка', false)
+    }
+  }
+
+  function removeEditImage(index) {
+    setEditImagesIds(prev => prev.filter((_, i) => i !== index))
+  }
+
+  function moveEditImage(index, direction) {
+    const newImages = [...editImagesIds]
+    const temp = newImages[index]
+    newImages[index] = newImages[index + direction]
+    newImages[index + direction] = temp
+    setEditImagesIds(newImages)
+  }
+
+  async function handleEditImageUpload(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const data = await uploadImage(file)
+      setEditImagesIds(prev => [...prev, data.id])
+      flash('Изображение загружено')
+    } catch (err) {
+      flash(err.msg ?? 'Ошибка загрузки изображения', false)
+    } finally {
+      setUploading(false)
+      e.target.value = ''
     }
   }
 
@@ -296,6 +357,52 @@ function ResourcesSection({ flash }) {
             </div>
           </div>
 
+          {/* Images section */}
+          <div className={styles.imagesSection}>
+            <span className={styles.propSelectLabel}>Изображения:</span>
+            <div className={styles.imagesList}>
+              {imagesIds.map((imgId, idx) => (
+                <div key={imgId} className={styles.imageItem}>
+                  <img src={getImageUrl(imgId)} alt="" className={styles.imagePreview} />
+                  <div className={styles.imageControls}>
+                    <button
+                      type="button"
+                      className={styles.moveBtn}
+                      onClick={() => moveImage(idx, -1)}
+                      disabled={idx === 0}
+                      title="Вверх"
+                    >↑</button>
+                    <button
+                      type="button"
+                      className={styles.moveBtn}
+                      onClick={() => moveImage(idx, 1)}
+                      disabled={idx === imagesIds.length - 1}
+                      title="Вниз"
+                    >↓</button>
+                    <button
+                      type="button"
+                      className={styles.removeImgBtn}
+                      onClick={() => removeImage(idx)}
+                      title="Удалить"
+                    >✕</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className={styles.uploadWrap}>
+              <label className={styles.uploadBtn}>
+                {uploading ? 'Загрузка...' : '+ Добавить изображение'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                  style={{ display: 'none' }}
+                />
+              </label>
+            </div>
+          </div>
+
           <div className={styles.formActions}>
             <button type="submit" className={styles.saveBtn}>Создать</button>
             <button type="button" className={styles.cancelBtn} onClick={resetForm}>Отмена</button>
@@ -339,6 +446,53 @@ function ResourcesSection({ flash }) {
                         placeholder="Цена"
                         min="0"
                       />
+                      
+                      {/* Edit images section */}
+                      <div className={styles.imagesSection}>
+                        <span className={styles.propSelectLabel}>Изображения:</span>
+                        <div className={styles.imagesList}>
+                          {editImagesIds.map((imgId, idx) => (
+                            <div key={imgId} className={styles.imageItem}>
+                              <img src={getImageUrl(imgId)} alt="" className={styles.imagePreview} />
+                              <div className={styles.imageControls}>
+                                <button
+                                  type="button"
+                                  className={styles.moveBtn}
+                                  onClick={() => moveEditImage(idx, -1)}
+                                  disabled={idx === 0}
+                                  title="Вверх"
+                                >↑</button>
+                                <button
+                                  type="button"
+                                  className={styles.moveBtn}
+                                  onClick={() => moveEditImage(idx, 1)}
+                                  disabled={idx === editImagesIds.length - 1}
+                                  title="Вниз"
+                                >↓</button>
+                                <button
+                                  type="button"
+                                  className={styles.removeImgBtn}
+                                  onClick={() => removeEditImage(idx)}
+                                  title="Удалить"
+                                >✕</button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className={styles.uploadWrap}>
+                          <label className={styles.uploadBtn}>
+                            {uploading ? 'Загрузка...' : '+ Добавить изображение'}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleEditImageUpload}
+                              disabled={uploading}
+                              style={{ display: 'none' }}
+                            />
+                          </label>
+                        </div>
+                      </div>
+
                       <button type="submit" className={styles.saveBtnSmall}>✓</button>
                       <button type="button" className={styles.cancelEditBtn} onClick={cancelEdit}>✕</button>
                     </form>
