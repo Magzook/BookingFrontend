@@ -432,34 +432,48 @@ function ResourcesSection({ flash }) {
               <div key={r.id} className={styles.resourceRow}>
                 {editId === r.id
                   ? <form onSubmit={handleSaveEdit} className={styles.editResourceForm}>
-                      <input
-                        className={styles.editInput}
-                        value={editName}
-                        onChange={e => setEditName(e.target.value)}
-                        placeholder="Название"
-                        required
-                      />
-                      <input
-                        className={styles.editInput}
-                        value={editShortDesc}
-                        onChange={e => setEditShortDesc(e.target.value)}
-                        placeholder="Краткое описание"
-                      />
-                      <textarea
-                        className={styles.editTextarea}
-                        value={editFullDesc}
-                        onChange={e => setEditFullDesc(e.target.value)}
-                        placeholder="Полное описание"
-                        rows={2}
-                      />
-                      <input
-                        type="number"
-                        className={styles.editInput}
-                        value={editPrice}
-                        onChange={e => setEditPrice(e.target.value)}
-                        placeholder="Цена"
-                        min="0"
-                      />
+                      <div className={styles.editFieldsColumn}>
+                        <label className={styles.editLabel}>
+                          Название
+                          <input
+                            className={styles.editInput}
+                            value={editName}
+                            onChange={e => setEditName(e.target.value)}
+                            placeholder="Название помещения"
+                            required
+                          />
+                        </label>
+                        <label className={styles.editLabel}>
+                          Краткое описание
+                          <input
+                            className={styles.editInput}
+                            value={editShortDesc}
+                            onChange={e => setEditShortDesc(e.target.value)}
+                            placeholder="Краткое описание"
+                          />
+                        </label>
+                        <label className={styles.editLabel}>
+                          Полное описание
+                          <textarea
+                            className={styles.editTextarea}
+                            value={editFullDesc}
+                            onChange={e => setEditFullDesc(e.target.value)}
+                            placeholder="Полное описание"
+                            rows={3}
+                          />
+                        </label>
+                        <label className={styles.editLabel}>
+                          Цена в час
+                          <input
+                            type="number"
+                            className={styles.editInput}
+                            value={editPrice}
+                            onChange={e => setEditPrice(e.target.value)}
+                            placeholder="Цена в час"
+                            min="0"
+                          />
+                        </label>
+                      </div>
                       
                       {/* Properties selection in edit mode */}
                       <div className={styles.propSelectWrap}>
@@ -526,8 +540,10 @@ function ResourcesSection({ flash }) {
                         </div>
                       </div>
 
-                      <button type="submit" className={styles.saveBtnSmall}>✓</button>
-                      <button type="button" className={styles.cancelEditBtn} onClick={cancelEdit}>✕</button>
+                      <div className={styles.formActions}>
+                        <button type="submit" className={styles.saveBtn}>Сохранить</button>
+                        <button type="button" className={styles.cancelBtn} onClick={cancelEdit}>Отмена</button>
+                      </div>
                     </form>
                   : <>
                       <div className={styles.resourceInfo}>
