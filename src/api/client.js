@@ -149,16 +149,24 @@ export async function createResource({ name, shortDescription, fullDescription, 
   throw { status: data.status, msg: data.msg }
 }
 
-export async function updateResource(id, { newname, shortDescription, fullDescription, pricePerHour }) {
+export async function updateResource(id, { newname, shortDescription, fullDescription, pricePerHour, imagesIds, propertiesIds }) {
+  const body = {};
+  if (newname !== undefined) body.newname = newname;
+  if (shortDescription !== undefined) body.shortDescription = shortDescription;
+  if (fullDescription !== undefined) body.fullDescription = fullDescription;
+  if (pricePerHour !== undefined) body.pricePerHour = pricePerHour;
+  if (imagesIds !== undefined) body.imagesIds = imagesIds;
+  if (propertiesIds !== undefined) body.propertiesIds = propertiesIds;
+
   const res = await fetch(`${BASE}/resources/${id}`, {
     method: 'PATCH',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ newname, shortDescription, fullDescription, pricePerHour })
-  })
-  if (res.ok) return res.json()
-  const data = await res.json().catch(() => ({}))
-  throw { status: data.status, msg: data.msg }
+    body: JSON.stringify(body)
+  });
+  if (res.ok) return res.json();
+  const data = await res.json().catch(() => ({}));
+  throw { status: data.status, msg: data.msg };
 }
 
 export async function deleteResource(id) {

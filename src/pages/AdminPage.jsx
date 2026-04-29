@@ -128,6 +128,7 @@ function ResourcesSection({ flash }) {
   const [editFullDesc, setEditFullDesc]   = useState('')
   const [editPrice, setEditPrice]         = useState('')
   const [editImagesIds, setEditImagesIds] = useState([])
+  const [editPropertiesIds, setEditPropertiesIds] = useState([])
 
   async function load() {
     getResources().then(setResources).finally(() => setLoading(false))
@@ -217,6 +218,7 @@ function ResourcesSection({ flash }) {
       setEditFullDesc(res.fullDescription || '')
       setEditPrice(String(res.pricePerHour || ''))
       setEditImagesIds(res.imagesIds || [])
+      setEditPropertiesIds(res.propertiesIds || [])
     } catch (err) {
       flash('Ошибка загрузки данных помещения', false)
     }
@@ -231,11 +233,11 @@ function ResourcesSection({ flash }) {
         fullDescription: editFullDesc,
         pricePerHour: editPrice ? parseInt(editPrice, 10) : undefined,
         imagesIds: editImagesIds,
-        propertiesIds: propertiesIds
+        propertiesIds: editPropertiesIds
       })
       setResources(prev => prev.map(r => 
         r.id === editId 
-          ? { ...r, name: editName, shortDescription: editShortDesc, fullDescription: editFullDesc, pricePerHour: editPrice ? parseInt(editPrice, 10) : r.pricePerHour, imagesIds: editImagesIds }
+          ? { ...r, name: editName, shortDescription: editShortDesc, fullDescription: editFullDesc, pricePerHour: editPrice ? parseInt(editPrice, 10) : r.pricePerHour, imagesIds: editImagesIds, propertiesIds: editPropertiesIds }
           : r
       ))
       setEditId(null)
@@ -459,6 +461,25 @@ function ResourcesSection({ flash }) {
                         min="0"
                       />
                       
+                      {/* Properties selection in edit mode */}
+                      <div className={styles.propSelectWrap}>
+                        <span className={styles.propSelectLabel}>Свойства:</span>
+                        <div className={styles.propCheckList}>
+                          {allProperties.map(p => (
+                            <label key={p.id} className={styles.propCheck}>
+                              <input
+                                type="checkbox"
+                                checked={editPropertiesIds.includes(p.id)}
+                                onChange={() => setEditPropertiesIds(prev => 
+                                  prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id]
+                                )}
+                              />
+                              <span>{p.name}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
                       {/* Edit images section */}
                       <div className={styles.imagesSection}>
                         <span className={styles.propSelectLabel}>Изображения:</span>
