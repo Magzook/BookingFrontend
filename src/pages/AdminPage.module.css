@@ -589,16 +589,18 @@
   background: #27ae60;
   color: var(--white);
   border: none;
-  border-radius: 7px;
-  width: 32px;
-  height: 32px;
-  font-size: 16px;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   transition: background .2s;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  min-width: 100px;
 }
 
 .saveBtnSmall:hover:not(:disabled) {
@@ -606,6 +608,33 @@
 }
 
 .saveBtnSmall:disabled {
+  opacity: .6;
+  cursor: default;
+}
+
+.cancelEditBtnSmall {
+  background: #e74c3c;
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 100px;
+}
+
+.cancelEditBtnSmall:hover:not(:disabled) {
+  background: #c0392b;
+}
+
+.cancelEditBtnSmall:disabled {
   opacity: .6;
   cursor: default;
 }

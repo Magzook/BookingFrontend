@@ -418,8 +418,8 @@ function ResourcesSection({ flash }) {
           </div>
 
           <div className={styles.formActions}>
-            <button type="submit" className={styles.saveBtn}>Создать</button>
-            <button type="button" className={styles.cancelBtn} onClick={resetForm}>Отмена</button>
+            <button type="submit" className={styles.saveBtnSmall} disabled={creating || uploading}>Создать</button>
+            <button type="button" className={styles.cancelEditBtnSmall} onClick={resetForm}>Отмена</button>
           </div>
         </form>
       )}
@@ -541,8 +541,8 @@ function ResourcesSection({ flash }) {
                       </div>
 
                       <div className={styles.formActions}>
-                        <button type="submit" className={styles.saveBtn}>Сохранить</button>
-                        <button type="button" className={styles.cancelBtn} onClick={cancelEdit}>Отмена</button>
+                        <button type="submit" className={styles.saveBtnSmall} disabled={saving || uploading}>Сохранить</button>
+                        <button type="button" className={styles.cancelEditBtnSmall} onClick={cancelEdit}>Отмена</button>
                       </div>
                     </form>
                   : <>
