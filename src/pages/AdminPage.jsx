@@ -229,7 +229,9 @@ function ResourcesSection({ flash }) {
         newname: editName,
         shortDescription: editShortDesc,
         fullDescription: editFullDesc,
-        pricePerHour: editPrice ? parseInt(editPrice, 10) : undefined
+        pricePerHour: editPrice ? parseInt(editPrice, 10) : undefined,
+        imagesIds: editImagesIds,
+        propertiesIds: propertiesIds
       })
       setResources(prev => prev.map(r => 
         r.id === editId 
@@ -251,7 +253,13 @@ function ResourcesSection({ flash }) {
   }
 
   function removeEditImage(index) {
-    setEditImagesIds(prev => prev.filter((_, i) => i !== index))
+    const imgId = editImagesIds[index]
+    deleteImageApi(imgId).then(() => {
+      setEditImagesIds(prev => prev.filter((_, i) => i !== index))
+      flash('Изображение удалено')
+    }).catch(() => {
+      flash('Ошибка удаления изображения', false)
+    })
   }
 
   function moveEditImage(index, direction) {
