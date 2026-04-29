@@ -170,3 +170,26 @@ export async function deleteResource(id) {
   const data = await res.json().catch(() => ({}))
   throw { status: data.status, msg: data.msg }
 }
+
+export async function uploadImage(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(`${BASE}/images`, {
+    method: 'POST',
+    credentials: 'include',
+    body: formData
+  });
+  if (res.ok) return res.json();
+  const data = await res.json().catch(() => ({}));
+  throw { status: data.status, msg: data.msg };
+}
+
+export async function deleteImageApi(id) {
+  const res = await fetch(`${BASE}/images/${id}`, {
+    method: 'DELETE',
+    credentials: 'include'
+  });
+  if (res.ok) return;
+  const data = await res.json().catch(() => ({}));
+  throw { status: data.status, msg: data.msg };
+}
