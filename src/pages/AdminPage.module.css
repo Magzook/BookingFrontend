@@ -355,3 +355,221 @@
   justify-content: center;
 }
 .cancelEditBtn:hover { background: var(--steam); }
+
+/* ── Resources form ── */
+.resourceForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: var(--fog);
+  border-radius: 10px;
+  border: 1px solid var(--steam);
+}
+
+.formInput,
+.formTextarea {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1.5px solid var(--steam);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--bark);
+  background: var(--white);
+  outline: none;
+  transition: border-color .2s;
+  box-sizing: border-box;
+}
+
+.formInput:focus,
+.formTextarea:focus {
+  border-color: var(--amber);
+}
+
+.formTextarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.propSelectWrap {
+  margin-top: 8px;
+}
+
+.propSelectLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ash);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.propCheckList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.propCheck {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--bark);
+  cursor: pointer;
+  padding: 6px 10px;
+  background: var(--white);
+  border-radius: 6px;
+  border: 1px solid var(--steam);
+  transition: background .2s, border-color .2s;
+}
+
+.propCheck:hover {
+  background: var(--steam);
+  border-color: var(--amber);
+}
+
+.propCheck input[type="checkbox"] {
+  accent-color: var(--ember);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.formActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.cancelBtn {
+  background: none;
+  border: 1.5px solid var(--steam);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ash);
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+
+.cancelBtn:hover {
+  background: var(--steam);
+  color: var(--bark);
+}
+
+.saveBtn {
+  background: #27ae60;
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: #2ecc71;
+}
+
+.saveBtn:disabled {
+  opacity: .6;
+  cursor: default;
+}
+
+/* ── Resources list ── */
+.resourceList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resourceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--fog);
+  border-radius: 8px;
+  border: 1px solid var(--steam);
+  min-height: 56px;
+}
+
+.resourceInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.resourceName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--bark);
+}
+
+.resourceShortDesc {
+  font-size: 13px;
+  color: var(--ash);
+}
+
+.resourcePrice {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ember);
+}
+
+.editResourceForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  align-items: center;
+}
+
+.editTextarea {
+  width: 100%;
+  padding: 7px 11px;
+  border: 1.5px solid var(--amber);
+  border-radius: 7px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--bark);
+  background: var(--white);
+  outline: none;
+  resize: vertical;
+  min-height: 60px;
+  box-sizing: border-box;
+}
+
+.saveBtnSmall {
+  background: #27ae60;
+  color: var(--white);
+  border: none;
+  border-radius: 7px;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.saveBtnSmall:hover:not(:disabled) {
+  background: #2ecc71;
+}
+
+.saveBtnSmall:disabled {
+  opacity: .6;
+  cursor: default;
+}

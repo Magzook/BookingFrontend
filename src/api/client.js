@@ -136,3 +136,37 @@ export const confirmEmailChange = (confirmationStatus)       => apiPatch('/me/pr
 export function getImageUrl(id) {
   return `${BASE}/images/${id}`
 }
+
+export async function createResource({ name, shortDescription, fullDescription, pricePerHour, imagesIds, propertiesIds }) {
+  const res = await fetch(`${BASE}/resources`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, shortDescription, fullDescription, pricePerHour, imagesIds, propertiesIds })
+  })
+  if (res.ok) return res.json()
+  const data = await res.json().catch(() => ({}))
+  throw { status: data.status, msg: data.msg }
+}
+
+export async function updateResource(id, { newname, shortDescription, fullDescription, pricePerHour }) {
+  const res = await fetch(`${BASE}/resources/${id}`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ newname, shortDescription, fullDescription, pricePerHour })
+  })
+  if (res.ok) return res.json()
+  const data = await res.json().catch(() => ({}))
+  throw { status: data.status, msg: data.msg }
+}
+
+export async function deleteResource(id) {
+  const res = await fetch(`${BASE}/resources/${id}`, {
+    method: 'DELETE',
+    credentials: 'include'
+  })
+  if (res.ok) return
+  const data = await res.json().catch(() => ({}))
+  throw { status: data.status, msg: data.msg }
+}
