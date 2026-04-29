@@ -1,0 +1,68 @@
+.main {
+  min-height: calc(100vh - var(--nav-h));
+  background: var(--fog);
+}
+
+.header {
+  background: var(--bark);
+  padding: 52px 32px 48px;
+  text-align: center;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: var(--ash);
+  letter-spacing: .02em;
+}
+
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 32px 80px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 28px;
+}
+
+/* ── States ── */
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 80px 0;
+  color: var(--ash);
+  font-size: 15px;
+}
+
+.stateIcon {
+  font-size: 40px;
+  opacity: .4;
+}
+
+.stateDetail {
+  font-size: 13px;
+  opacity: .7;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--steam);
+  border-top-color: var(--amber);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

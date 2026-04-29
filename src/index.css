@@ -1,0 +1,38 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bark:      #2C1A0E;
+  --ember:     #B04A12;
+  --amber:     #D4782A;
+  --honey:     #E8A857;
+  --steam:     #F5EBD8;
+  --ash:       #9C8878;
+  --fog:       #F9F3EA;
+  --white:     #FEFCF8;
+
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'Raleway', sans-serif;
+
+  --nav-h: 68px;
+  --radius: 12px;
+  --shadow: 0 4px 24px rgba(44,26,14,.13);
+  --shadow-hover: 0 10px 40px rgba(44,26,14,.22);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--fog);
+  color: var(--bark);
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+::selection { background: var(--honey); color: var(--bark); }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--steam); }
+::-webkit-scrollbar-thumb { background: var(--amber); border-radius: 3px; }
