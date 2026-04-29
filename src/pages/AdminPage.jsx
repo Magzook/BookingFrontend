@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getWorkingDays, addWorkingDay, deleteWorkingDay, getProperties } from '../api/client'
+import { getWorkingDays, addWorkingDay, deleteWorkingDay, getProperties, getResources, createResource, updateResource, deleteResource } from '../api/client'
 import styles from './AdminPage.module.css'
 
 // ── Mini calendar ──────────────────────────────────────────────────────────
@@ -104,7 +104,267 @@ function Section({ title, children }) {
   )
 }
 
-// ── Properties section ─────────────────────────────────────────────────────
+// ── Resources section ──────────────────────────────────────────────────────
+
+function ResourcesSection({ flash }) {
+  const [resources, setResources]   = useState([])
+  const [loading, setLoading]       = useState(true)
+  const [showForm, setShowForm]     = useState(false)
+  
+  // Form state
+  const [name, setName]             = useState('')
+  const [shortDescription, setShortDescription] = useState('')
+  const [fullDescription, setFullDescription]   = useState('')
+  const [pricePerHour, setPricePerHour]         = useState('')
+  const [propertiesIds, setPropertiesIds]       = useState([])
+  const [allProperties, setAllProperties]       = useState([])
+  
+  // Edit state
+  const [editId, setEditId]         = useState(null)
+  const [editName, setEditName]     = useState('')
+  const [editShortDesc, setEditShortDesc] = useState('')
+  const [editFullDesc, setEditFullDesc]   = useState('')
+  const [editPrice, setEditPrice]         = useState('')
+
+  async function load() {
+    getResources().then(setResources).finally(() => setLoading(false))
+    getProperties().then(setAllProperties)
+  }
+  useEffect(() => { load() }, [])
+
+  async function handleCreate(e) {
+    e.preventDefault()
+    try {
+      const data = await createResource({
+        name,
+        shortDescription,
+        fullDescription,
+        pricePerHour: parseInt(pricePerHour, 10),
+        imagesIds: [],
+        propertiesIds
+      })
+      setResources(prev => [...prev, { id: data.id, name, shortDescription, fullDescription, pricePerHour: parseInt(pricePerHour, 10) }])
+      resetForm()
+      flash('Помещение создано')
+    } catch (err) {
+      const ERRORS = {
+        '-1': 'Неверный формат названия',
+        '-2': 'Неверный формат краткого описания',
+        '-3': 'Неверный формат полного описания',
+        '-4': 'Неверный формат цены',
+        '-5': 'Изображение не найдено',
+        '-6': 'Свойство не найдено',
+        '-7': 'Помещение с таким названием уже существует'
+      }
+      flash(ERRORS[String(err.status)] ?? err.msg ?? 'Ошибка', false)
+    }
+  }
+
+  function resetForm() {
+    setName('')
+    setShortDescription('')
+    setFullDescription('')
+    setPricePerHour('')
+    setPropertiesIds([])
+    setShowForm(false)
+  }
+
+  function toggleProperty(id) {
+    setPropertiesIds(prev => 
+      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
+    )
+  }
+
+  async function handleEdit(id) {
+    const res = resources.find(r => r.id === id)
+    if (!res) return
+    setEditId(id)
+    setEditName(res.name)
+    setEditShortDesc(res.shortDescription || '')
+    setEditFullDesc(res.fullDescription || '')
+    setEditPrice(String(res.pricePerHour || ''))
+  }
+
+  async function handleSaveEdit(e) {
+    e.preventDefault()
+    try {
+      await updateResource(editId, {
+        newname: editName,
+        shortDescription: editShortDesc,
+        fullDescription: editFullDesc,
+        pricePerHour: editPrice ? parseInt(editPrice, 10) : undefined
+      })
+      setResources(prev => prev.map(r => 
+        r.id === editId 
+          ? { ...r, name: editName, shortDescription: editShortDesc, fullDescription: editFullDesc, pricePerHour: editPrice ? parseInt(editPrice, 10) : r.pricePerHour }
+          : r
+      ))
+      setEditId(null)
+      flash('Помещение обновлено')
+    } catch (err) {
+      const ERRORS = {
+        '-1': 'Неверный формат названия',
+        '-2': 'Неверный формат краткого описания',
+        '-3': 'Неверный формат полного описания',
+        '-4': 'Неверный формат цены',
+        '-7': 'Помещение с таким названием уже существует'
+      }
+      flash(ERRORS[String(err.status)] ?? err.msg ?? 'Ошибка', false)
+    }
+  }
+
+  async function handleDelete(id, resName) {
+    if (!confirm(`Удалить помещение «${resName}»?`)) return
+    try {
+      await deleteResource(id)
+      setResources(prev => prev.filter(r => r.id !== id))
+      flash('Помещение удалено')
+    } catch (err) {
+      const ERRORS = {
+        '-1': 'На это помещение есть брони — сначала отмените их'
+      }
+      flash(ERRORS[String(err.status)] ?? err.msg ?? 'Ошибка', false)
+    }
+  }
+
+  function cancelEdit() {
+    setEditId(null)
+  }
+
+  if (loading) return <div className={styles.spinWrap}><span className={styles.spinner} /></div>
+
+  return (
+    <div>
+      {/* Header with Add button */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h3 className={styles.listTitle}>Список помещений</h3>
+        {!showForm && (
+          <button className={styles.addBtn} onClick={() => setShowForm(true)}>
+            + Добавить помещение
+          </button>
+        )}
+      </div>
+
+      {/* Add form */}
+      {showForm && (
+        <form onSubmit={handleCreate} className={styles.resourceForm}>
+          <input
+            className={styles.formInput}
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="Название помещения"
+            required
+          />
+          <input
+            className={styles.formInput}
+            value={shortDescription}
+            onChange={e => setShortDescription(e.target.value)}
+            placeholder="Краткое описание"
+            required
+          />
+          <textarea
+            className={styles.formTextarea}
+            value={fullDescription}
+            onChange={e => setFullDescription(e.target.value)}
+            placeholder="Полное описание"
+            rows={3}
+            required
+          />
+          <input
+            type="number"
+            className={styles.formInput}
+            value={pricePerHour}
+            onChange={e => setPricePerHour(e.target.value)}
+            placeholder="Цена в час"
+            min="0"
+            required
+          />
+          
+          <div className={styles.propSelectWrap}>
+            <span className={styles.propSelectLabel}>Свойства:</span>
+            <div className={styles.propCheckList}>
+              {allProperties.map(p => (
+                <label key={p.id} className={styles.propCheck}>
+                  <input
+                    type="checkbox"
+                    checked={propertiesIds.includes(p.id)}
+                    onChange={() => toggleProperty(p.id)}
+                  />
+                  <span>{p.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.formActions}>
+            <button type="submit" className={styles.saveBtn}>Создать</button>
+            <button type="button" className={styles.cancelBtn} onClick={resetForm}>Отмена</button>
+          </div>
+        </form>
+      )}
+
+      {/* Resources list */}
+      {resources.length === 0
+        ? <p className={styles.empty}>Помещения не добавлены</p>
+        : <div className={styles.resourceList}>
+            {resources.map(r => (
+              <div key={r.id} className={styles.resourceRow}>
+                {editId === r.id
+                  ? <form onSubmit={handleSaveEdit} className={styles.editResourceForm}>
+                      <input
+                        className={styles.editInput}
+                        value={editName}
+                        onChange={e => setEditName(e.target.value)}
+                        placeholder="Название"
+                        required
+                      />
+                      <input
+                        className={styles.editInput}
+                        value={editShortDesc}
+                        onChange={e => setEditShortDesc(e.target.value)}
+                        placeholder="Краткое описание"
+                      />
+                      <textarea
+                        className={styles.editTextarea}
+                        value={editFullDesc}
+                        onChange={e => setEditFullDesc(e.target.value)}
+                        placeholder="Полное описание"
+                        rows={2}
+                      />
+                      <input
+                        type="number"
+                        className={styles.editInput}
+                        value={editPrice}
+                        onChange={e => setEditPrice(e.target.value)}
+                        placeholder="Цена"
+                        min="0"
+                      />
+                      <button type="submit" className={styles.saveBtnSmall}>✓</button>
+                      <button type="button" className={styles.cancelEditBtn} onClick={cancelEdit}>✕</button>
+                    </form>
+                  : <>
+                      <div className={styles.resourceInfo}>
+                        <span className={styles.resourceName}>{r.name}</span>
+                        {r.shortDescription && <span className={styles.resourceShortDesc}>{r.shortDescription}</span>}
+                        <span className={styles.resourcePrice}>{r.pricePerHour} ₽/час</span>
+                      </div>
+                      <div className={styles.propActions}>
+                        <button className={styles.editBtn} onClick={() => handleEdit(r.id)}>
+                          Редактировать
+                        </button>
+                        <button className={styles.deleteBtn} onClick={() => handleDelete(r.id, r.name)}>
+                          Удалить
+                        </button>
+                      </div>
+                    </>
+                }
+              </div>
+            ))}
+          </div>
+      }
+    </div>
+  )
+}
 
 function PropertiesSection({ flash }) {
   const [properties, setProperties]   = useState([])
@@ -273,6 +533,10 @@ export default function AdminPage() {
         <h1 className={styles.title}>Панель администратора</h1>
 
         {msg && <div className={`${styles.toast} ${msgOk ? styles.toastOk : styles.toastErr}`}>{msg}</div>}
+
+        <Section title="Помещения">
+          <ResourcesSection flash={flash} />
+        </Section>
 
         <Section title="Рабочие дни">
           {loading
