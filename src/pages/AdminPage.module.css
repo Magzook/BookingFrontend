@@ -528,25 +528,61 @@
 
 .editResourceForm {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column;
+  gap: 12px;
   width: 100%;
-  align-items: center;
+}
+
+.editFieldsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.editLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ash);
+}
+
+.editInput {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1.5px solid var(--steam);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--bark);
+  background: var(--white);
+  outline: none;
+  transition: border-color .2s;
+  box-sizing: border-box;
+}
+
+.editInput:focus {
+  border-color: var(--amber);
 }
 
 .editTextarea {
   width: 100%;
-  padding: 7px 11px;
-  border: 1.5px solid var(--amber);
-  border-radius: 7px;
+  padding: 10px 13px;
+  border: 1.5px solid var(--steam);
+  border-radius: 8px;
   font-family: var(--font-body);
   font-size: 14px;
   color: var(--bark);
   background: var(--white);
   outline: none;
   resize: vertical;
-  min-height: 60px;
+  min-height: 80px;
   box-sizing: border-box;
+}
+
+.editTextarea:focus {
+  border-color: var(--amber);
 }
 
 .saveBtnSmall {
