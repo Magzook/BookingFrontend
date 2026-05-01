@@ -127,6 +127,31 @@ export async function deleteWorkingDay(date) {
   throw { status: data.status, msg: data.msg }
 }
 
+// --- НОВЫЕ ФУНКЦИИ ДЛЯ ХОСТЕСА ---
+
+export async function getHostessBookingsByDay(date) {
+  const res = await fetch(`${BASE}/hostess/bookings/byDay/${date}`, {
+    credentials: 'include'
+  })
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}))
+    // Пробрасываем ошибку дальше, чтобы компонент мог обработать 404 (не рабочий день)
+    throw { status: data.status, msg: data.msg, response: res }
+  }
+  return res.json()
+}
+
+export async function getHostessBookingByCode(code) {
+  const res = await fetch(`${BASE}/hostess/bookings/byCode/${code}`, { credentials: 'include' });
+  if (!res.ok) {
+    if (res.status === 404) throw new Error('Бронь с таким кодом не найдена');
+    throw new Error('Ошибка сервера');
+  }
+  return res.json();
+}
+
+// --------------------------------
+
 export const updateName     = (newName)                      => apiPatch('/me/profile/name',          { newName })
 export const updateLogin    = (newLogin)                     => apiPatch('/me/profile/login',         { newLogin })
 export const updatePassword = (oldPassword, newPassword)     => apiPatch('/me/profile/password',      { oldPassword, newPassword })

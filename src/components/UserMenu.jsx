@@ -44,7 +44,7 @@ export default function UserMenu({ profile, onLogout }) {
           </button>
           <div className={styles.sep} />
           {isHostess && (
-            <button className={styles.item} disabled>Панель хостеса</button>
+            <button className={styles.item} onClick={() => { setOpen(false); navigate('/hostess') }}>Панель хостеса</button>
           )}
           {isAdmin && (
             <button className={styles.item} onClick={() => { setOpen(false); navigate('/admin') }}>Панель администратора</button>

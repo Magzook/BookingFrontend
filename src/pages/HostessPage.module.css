@@ -1,0 +1,265 @@
+.hostessPage {
+  padding: 20px;
+  max-width: 100%;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  overflow-x: auto;
+}
+
+.controls {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.controls input {
+  padding: 8px;
+  font-size: 16px;
+  margin-left: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.warning {
+  color: #e74c3c;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.tableContainer {
+  overflow-x: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+}
+
+.bookingsTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px; /* Чтобы появилась прокрутка на маленьких экранах */
+}
+
+.resourceHeader, .timeHeader {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 12px 8px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
+}
+
+.resourceHeader {
+  text-align: left;
+  min-width: 200px;
+  position: sticky;
+  left: 0;
+  background-color: #f0f0f0;
+  z-index: 20;
+  border-right: 2px solid #ccc;
+}
+
+.resourceName {
+  border: 1px solid #ccc;
+  padding: 10px;
+  font-weight: bold;
+  background-color: #fff;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  border-right: 2px solid #ccc;
+  vertical-align: top;
+}
+
+.timeHeader {
+  width: 40px;
+  padding: 8px 2px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 13px;
+  color: #333;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.timeHour {
+  font-size: 13px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.timeMin {
+  font-size: 10px;
+  font-weight: normal;
+  color: #7f8c8d;
+  margin-top: 2px;
+}
+
+
+.emptySlot {
+  border: 1px solid #eee;
+  height: 50px;
+  width: 40px;
+  box-sizing: border-box;
+  background-color: #fff;
+}
+
+.bookedSlot {
+  border: 1px solid #999;
+  height: 50px;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  position: relative;
+  color: transparent; /* Скрываем текст, если он вдруг появится */
+}
+
+.bookedSlot:hover {
+  opacity: 0.8;
+  outline: 2px solid #3498db;
+  z-index: 5;
+}
+
+/* Цвета для смежных интервалов */
+.slotBlack {
+  background-color: #2c3e50; /* Темно-синий/черный */
+}
+
+.slotGray {
+  background-color: #95a5a6; /* Серый */
+}
+
+/* Модальное окно */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  width: 350px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  position: relative;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modalContent h2 {
+  margin-top: 0;
+  font-size: 20px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 15px;
+  color: #2c3e50;
+}
+
+.modalContent p {
+  margin: 12px 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.closeBtn {
+  margin-top: 25px;
+  width: 100%;
+  padding: 12px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.closeBtn:hover {
+  background-color: #c0392b;
+}
+
+.loading, .empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #7f8c8d;
+  font-size: 18px;
+}
+
+.error {
+  text-align: center;
+  padding: 60px 20px;
+  color: #e74c3c;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+searchSection {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #eee;
+}
+
+.searchSection h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.searchInputWrapper {
+  display: flex;
+  gap: 10px;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.searchBtn {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.searchBtn:hover:not(:disabled) {
+  background-color: #2980b9;
+}
+
+.searchBtn:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+.searchError {
+  margin-top: 10px;
+  color: #e74c3c;
+  font-weight: bold;
+  font-size: 14px;
+}

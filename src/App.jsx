@@ -8,6 +8,7 @@ import RegisterPage from './pages/RegisterPage'
 import { getProfile } from './api/client'
 
 import AdminPage from './pages/AdminPage'
+import HostessPage from './pages/HostessPage'
 import MyBookingsPage from './pages/MyBookingsPage'
 import BookingSuccessPage from './pages/BookingSuccessPage'
 import ResourcePage from './pages/ResourcePage'
@@ -47,6 +48,7 @@ function AppInner() {
           />
         } />
         <Route path="/admin"         element={<AdminPage />} />
+        <Route path="/hostess" element={<HostessPage />} />
         <Route path="/my-bookings"   element={<MyBookingsPage />} />
         <Route path="/booking-success" element={<BookingSuccessPage />} />
         <Route path="/profile"   element={<ProfilePage />} />
