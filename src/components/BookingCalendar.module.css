@@ -1,0 +1,94 @@
+/* ── Booking calendar ────────────────────────────────────────────────────── */
+.bookCal {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.bookCalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.bookCalNav {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: var(--ash);
+  cursor: pointer;
+  padding: 0 8px;
+  line-height: 1;
+  transition: color .2s;
+}
+.bookCalNav:hover:not(:disabled) { color: var(--ember); }
+.bookCalNav:disabled { opacity: .3; cursor: default; }
+
+.bookCalMonth {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--bark);
+}
+
+.bookCalGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.bookCalDow {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ash);
+  padding: 6px 0;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.bookCalDay {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  background: var(--fog);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bark);
+  cursor: pointer;
+  transition: background .2s, color .2s, transform .1s;
+}
+.bookCalDay:hover:not(:disabled) {
+  background: var(--steam);
+}
+.bookCalDay:active:not(:disabled) {
+  transform: scale(.95);
+}
+
+.bookCalDayWork {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+.bookCalDayWork:hover:not(:disabled) {
+  background: #c8e6c9;
+}
+
+.bookCalDaySel {
+  background: var(--ember) !important;
+  color: var(--white) !important;
+  box-shadow: 0 2px 8px rgba(230,81,0,.35);
+}
+
+.bookCalDayOff {
+  background: var(--fog);
+  color: #bbb;
+  cursor: not-allowed;
+}
+.bookCalDayOff:hover {
+  background: var(--fog);
+}
