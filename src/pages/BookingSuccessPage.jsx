@@ -43,7 +43,7 @@ export default function BookingSuccessPage() {
       <div className={styles.card}>
 
         <div className={styles.checkmark}>✓</div>
-        <h1 className={styles.title}>Бронирование подтверждено!</h1>
+        <h1 className={styles.title}>Бронирование выполнено</h1>
 
         {/* Resource preview */}
         <div className={styles.resourcePreview}>

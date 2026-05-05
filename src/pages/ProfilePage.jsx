@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getProfile, updateName, updateLogin, updatePassword, updateEmail, confirmEmailChange } from '../api/client'
+import { getProfile, updatePersonal, updatePassword, updateEmail, confirmEmailChange } from '../api/client'
 import styles from './ProfilePage.module.css'
 
 function Section({ title, children }) {
@@ -28,70 +28,107 @@ function StatusMsg({ ok, msg }) {
   return <p className={ok ? styles.success : styles.error}>{msg}</p>
 }
 
-function NameSection({ current, onUpdated }) {
+function PersonalSection({ current, onUpdated }) {
   const [editing, setEditing] = useState(false)
-  const [value, setValue]     = useState('')
+  const [lastName,       setLastName]       = useState('')
+  const [firstName,      setFirstName]      = useState('')
+  const [middleName,     setMiddleName]     = useState('')
+  const [birthDate,      setBirthDate]      = useState('')
+  const [documentNumber, setDocumentNumber] = useState('')
   const [loading, setLoading] = useState(false)
   const [msg, setMsg]         = useState(null)
   const [ok, setOk]           = useState(false)
-  const ERRORS = { '-1': 'Имя не может быть пустым' }
 
-  async function handleSubmit(e) {
-    e.preventDefault(); setLoading(true); setMsg(null)
-    try {
-      await updateName(value); setOk(true); setMsg('Имя изменено'); setEditing(false); onUpdated()
-    } catch (err) { setOk(false); setMsg(ERRORS[String(err.status)] ?? err.msg) }
-    finally { setLoading(false) }
+  const ERRORS = {
+    '-1': 'Фамилия, имя, дата рождения и номер документа не могут быть пустыми',
   }
 
-  return (
-    <Section title="Имя">
-      {!editing
-        ? <FieldRow label="Текущее имя" value={current} onEdit={() => { setValue(current ?? ''); setMsg(null); setEditing(true) }} />
-        : <form onSubmit={handleSubmit} className={styles.form}>
-            <input className={styles.input} value={value} onChange={e => setValue(e.target.value)} autoFocus placeholder="Введите имя" required />
-            <StatusMsg ok={ok} msg={msg} />
-            <div className={styles.formBtns}>
-              <button className={styles.saveBtn} disabled={loading}>{loading ? 'Сохраняем…' : 'Сохранить'}</button>
-              <button type="button" className={styles.cancelBtn} onClick={() => setEditing(false)}>Отмена</button>
-            </div>
-          </form>
-      }
-      {!editing && <StatusMsg ok={ok} msg={msg} />}
-    </Section>
-  )
-}
-
-function LoginSection({ current, onUpdated }) {
-  const [editing, setEditing] = useState(false)
-  const [value, setValue]     = useState('')
-  const [loading, setLoading] = useState(false)
-  const [msg, setMsg]         = useState(null)
-  const [ok, setOk]           = useState(false)
-  const ERRORS = { '-1': 'Логин имеет неверный формат (1–20 символов: буквы, цифры, - _)', '-2': 'Этот логин уже занят' }
-
-  async function handleSubmit(e) {
-    e.preventDefault(); setLoading(true); setMsg(null)
-    try {
-      await updateLogin(value); setOk(true); setMsg('Логин изменён'); setEditing(false); onUpdated()
-    } catch (err) { setOk(false); setMsg(ERRORS[String(err.status)] ?? err.msg) }
-    finally { setLoading(false) }
+  function openEdit() {
+    setLastName(current.lastName ?? '')
+    setFirstName(current.firstName ?? '')
+    setMiddleName(current.middleName ?? '')
+    setBirthDate(current.birthDate ?? '')
+    setDocumentNumber(current.documentNumber ?? '')
+    setMsg(null)
+    setEditing(true)
   }
 
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setLoading(true)
+    setMsg(null)
+    try {
+      await updatePersonal({
+        newLastName:       lastName       !== current.lastName       ? lastName       : undefined,
+        newFirstName:      firstName      !== current.firstName      ? firstName      : undefined,
+        newMiddleName:     middleName     !== current.middleName     ? middleName     : undefined,
+        newBirthDate:      birthDate      !== current.birthDate      ? birthDate      : undefined,
+        newDocumentNumber: documentNumber !== current.documentNumber ? documentNumber : undefined,
+      })
+      setOk(true)
+      setMsg('Персональные данные сохранены')
+      setEditing(false)
+      onUpdated()
+    } catch (err) {
+      setOk(false)
+      setMsg(ERRORS[String(err.status)] ?? err.msg)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fullName = [current.lastName, current.firstName, current.middleName].filter(Boolean).join(' ')
+
   return (
-    <Section title="Логин">
-      {!editing
-        ? <FieldRow label="Текущий логин" value={current} onEdit={() => { setValue(''); setMsg(null); setEditing(true) }} />
-        : <form onSubmit={handleSubmit} className={styles.form}>
-            <input className={styles.input} value={value} onChange={e => setValue(e.target.value)} autoFocus placeholder="Новый логин" required />
-            <StatusMsg ok={ok} msg={msg} />
-            <div className={styles.formBtns}>
-              <button className={styles.saveBtn} disabled={loading}>{loading ? 'Сохраняем…' : 'Сохранить'}</button>
-              <button type="button" className={styles.cancelBtn} onClick={() => setEditing(false)}>Отмена</button>
+    <Section title="Персональные данные">
+      {!editing ? (
+        <>
+          <div className={styles.personalFields}>
+            <div className={styles.personalField}>
+              <p className={styles.fieldLabel}>ФИО</p>
+              <p className={styles.fieldValue}>{fullName || <span className={styles.empty}>не указано</span>}</p>
             </div>
-          </form>
-      }
-      {!editing && <StatusMsg ok={ok} msg={msg} />}
+            <div className={styles.personalField}>
+              <p className={styles.fieldLabel}>Дата рождения</p>
+              <p className={styles.fieldValue}>{current.birthDate || <span className={styles.empty}>не указано</span>}</p>
+            </div>
+            <div className={styles.personalField}>
+              <p className={styles.fieldLabel}>Номер документа</p>
+              <p className={styles.fieldValue}>{current.documentNumber || <span className={styles.empty}>не указано</span>}</p>
+            </div>
+          </div>
+          <button className={styles.editBtn} onClick={openEdit}>Изменить</button>
+          <StatusMsg ok={ok} msg={msg} />
+        </>
+      ) : (
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <label className={styles.label}>Фамилия
+            <input className={styles.input} value={lastName} onChange={e => setLastName(e.target.value)}
+              autoFocus placeholder="Фамилия" required />
+          </label>
+          <label className={styles.label}>Имя
+            <input className={styles.input} value={firstName} onChange={e => setFirstName(e.target.value)}
+              placeholder="Имя" required />
+          </label>
+          <label className={styles.label}>Отчество
+            <input className={styles.input} value={middleName} onChange={e => setMiddleName(e.target.value)}
+              placeholder="Отчество (необязательно)" />
+          </label>
+          <label className={styles.label}>Дата рождения
+            <input className={styles.input} type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)}
+              required />
+          </label>
+          <label className={styles.label}>Номер документа
+            <input className={styles.input} value={documentNumber} onChange={e => setDocumentNumber(e.target.value)}
+              placeholder="Номер документа" required />
+          </label>
+          <StatusMsg ok={ok} msg={msg} />
+          <div className={styles.formBtns}>
+            <button className={styles.saveBtn} disabled={loading}>{loading ? 'Сохраняем…' : 'Сохранить'}</button>
+            <button type="button" className={styles.cancelBtn} onClick={() => setEditing(false)}>Отмена</button>
+          </div>
+        </form>
+      )}
     </Section>
   )
 }
@@ -150,12 +187,12 @@ function PasswordSection() {
 }
 
 function EmailSection({ current, onUpdated }) {
-  const [step, setStep]         = useState('view')
+  const [step, setStep]               = useState('view')
   const [newEmailVal, setNewEmailVal] = useState('')
-  const [code, setCode]         = useState('')
-  const [loading, setLoading]   = useState(false)
-  const [msg, setMsg]           = useState(null)
-  const [ok, setOk]             = useState(false)
+  const [code, setCode]               = useState('')
+  const [loading, setLoading]         = useState(false)
+  const [msg, setMsg]                 = useState(null)
+  const [ok, setOk]                   = useState(false)
   const EMAIL_ERRORS   = { '-1': 'Email имеет неверный формат', '-2': 'Этот email уже используется' }
   const CONFIRM_ERRORS = { '-2': 'Неверный код подтверждения', '-3': 'Этот email уже используется' }
 
@@ -229,10 +266,9 @@ export default function ProfilePage() {
     <main className={styles.main}>
       <div className={styles.container}>
         <h1 className={styles.title}>Профиль</h1>
-        <NameSection     current={profile.name}  onUpdated={reload} />
-        <LoginSection    current={profile.login} onUpdated={reload} />
+        <PersonalSection current={profile} onUpdated={reload} />
         <PasswordSection />
-        <EmailSection    current={profile.email} onUpdated={reload} />
+        <EmailSection current={profile.email} onUpdated={reload} />
       </div>
     </main>
   )

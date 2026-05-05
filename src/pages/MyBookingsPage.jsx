@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getMyBookings, getResources, cancelBooking, getImageUrl } from '../api/client'
+import { getMyBookings, cancelBooking, getImageUrl } from '../api/client'
 import styles from './MyBookingsPage.module.css'
 
 function formatDate(dateStr) {
@@ -17,12 +17,13 @@ function formatDuration(d) {
        :                    `${min} мин`
 }
 
-function BookingCard({ booking, resource, onCancelled }) {
+function BookingCard({ booking, onCancelled }) {
   const navigate  = useNavigate()
   const [cancelling, setCancelling] = useState(false)
   const [error, setError]           = useState(null)
   const [cancelled, setCancelled]   = useState(false)
 
+  const { resource } = booking
   const timeFrom = booking.timeFrom?.slice(0, 5)
 
   async function handleCancel() {
@@ -50,7 +51,7 @@ function BookingCard({ booking, resource, onCancelled }) {
       </div>
 
       <div className={styles.cardBody}>
-        <h3 className={styles.resourceName}>{resource?.name ?? `Ресурс #${booking.resourceId}`}</h3>
+        <h3 className={styles.resourceName}>{resource?.name ?? `Ресурс #${booking.id}`}</h3>
 
         <div className={styles.meta}>
           <div className={styles.metaRow}>
@@ -71,17 +72,13 @@ function BookingCard({ booking, resource, onCancelled }) {
               {Number(booking.price).toLocaleString('ru-RU', { maximumFractionDigits: 0 })} ₽
             </span>
           </div>
-          <div className={styles.metaRow}>
-            <span className={styles.metaLabel}>Код брони</span>
-            <span className={`${styles.metaValue} ${styles.code}`}>{booking.secretCode}</span>
-          </div>
         </div>
 
         {error && <p className={styles.error}>{error}</p>}
 
         <div className={styles.actions}>
-          <button className={styles.btnSecondary} onClick={() => navigate(`/resources/${booking.resourceId}`)}>
-            Перейти к ресурсу
+          <button className={styles.btnSecondary} onClick={() => navigate(`/resources/${resource?.id}`)}>
+            Перейти к помещению
           </button>
           <button className={styles.btnCancel} onClick={handleCancel} disabled={cancelling}>
             {cancelling ? 'Отмена…' : 'Отменить бронь'}
@@ -93,17 +90,13 @@ function BookingCard({ booking, resource, onCancelled }) {
 }
 
 export default function MyBookingsPage() {
-  const [bookings, setBookings]     = useState([])
-  const [resourceMap, setResourceMap] = useState({})
-  const [loading, setLoading]       = useState(true)
-  const [error, setError]           = useState(null)
+  const [bookings, setBookings] = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState(null)
 
   function load() {
-    Promise.all([getMyBookings(), getResources()])
-      .then(([bks, res]) => {
-        setBookings(bks)
-        setResourceMap(Object.fromEntries(res.map(r => [r.id, r])))
-      })
+    getMyBookings()
+      .then(setBookings)
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
   }
@@ -137,7 +130,6 @@ export default function MyBookingsPage() {
               <BookingCard
                 key={b.id}
                 booking={b}
-                resource={resourceMap[b.resourceId]}
                 onCancelled={load}
               />
             ))}

@@ -121,3 +121,18 @@
   background: var(--ember);
   color: var(--white);
 }
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--bark);
+  cursor: pointer;
+}

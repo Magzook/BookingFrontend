@@ -44,6 +44,16 @@
   gap: 16px;
 }
 
+/* ── Personal fields (view mode, no individual edit buttons) ── */
+.personalFields {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.personalField { /* inherits fieldLabel / fieldValue styles */ }
+
 .fieldLabel {
   font-size: 12px;
   font-weight: 600;

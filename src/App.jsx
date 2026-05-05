@@ -4,8 +4,10 @@ import Navbar from './components/Navbar'
 import HomePage from './pages/HomePage'
 import CatalogPage from './pages/CatalogPage'
 import LoginPage from './pages/LoginPage'
+import StaffLoginPage from './pages/StaffLoginPage'
 import RegisterPage from './pages/RegisterPage'
-import { getProfile } from './api/client'
+import { getGuestProfile, makeStaffProfile } from './api/client'
+import ProtectedRoute from './components/ProtectedRoute'
 
 import AdminPage from './pages/AdminPage'
 import HostessPage from './pages/HostessPage'
@@ -18,15 +20,24 @@ function AppInner() {
   const [profile, setProfile] = useState(null)
   const navigate = useNavigate()
 
+  // On mount: try to restore a guest session (staff have no session-check endpoint)
   useEffect(() => {
-    getProfile().then(setProfile)
+    getGuestProfile().then(setProfile)
   }, [])
 
-  function handleLoginSuccess() {
-    getProfile().then(p => {
-      setProfile(p)
-      navigate('/')
-    })
+  async function handleLoginSuccess() {
+    const p = await getGuestProfile()
+    setProfile(p)
+    navigate('/')
+  }
+
+  function handleStaffLoginSuccess(login, role) {
+    setProfile(makeStaffProfile(login, role))
+    if (role === 'admin') {
+      navigate('/admin')
+    } else {
+      navigate('/hostess')
+    }
   }
 
   function handleLogout() {
@@ -38,25 +49,46 @@ function AppInner() {
     <>
       <Navbar profile={profile} onLogout={handleLogout} />
       <Routes>
-        <Route path="/"          element={<HomePage />} />
+        <Route path="/"           element={<HomePage />} />
         <Route path="/resources"      element={<CatalogPage />} />
         <Route path="/resources/:id"  element={<ResourcePage />} />
-        <Route path="/sign-in"   element={
+
+        {/* Guest login */}
+        <Route path="/sign-in" element={
           <LoginPage
             onSuccess={handleLoginSuccess}
             onBack={() => navigate(-1)}
           />
         } />
-        <Route path="/admin"         element={<AdminPage />} />
-        <Route path="/hostess" element={<HostessPage />} />
-        <Route path="/my-bookings"   element={<MyBookingsPage />} />
-        <Route path="/booking-success" element={<BookingSuccessPage />} />
-        <Route path="/profile"   element={<ProfilePage />} />
-        <Route path="/sign-up"   element={
+
+        {/* Staff login (hostess / admin) */}
+        <Route path="/sign-in-as-staff" element={
+          <StaffLoginPage onSuccess={handleStaffLoginSuccess} />
+        } />
+
+        <Route path="/sign-up" element={
           <RegisterPage
             onSuccess={handleLoginSuccess}
             onBack={() => navigate('/sign-in')}
           />
+        } />
+
+        <Route path="/admin" element={
+          <ProtectedRoute profile={profile} allowedRoles={['admin']}>
+            <AdminPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/hostess" element={
+          <ProtectedRoute profile={profile} allowedRoles={['hostess']}>
+            <HostessPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/my-bookings"     element={<MyBookingsPage />} />
+        <Route path="/booking-success" element={<BookingSuccessPage />} />
+        <Route path="/profile" element={
+          <ProtectedRoute profile={profile} allowedRoles={['guest']}>
+            <ProfilePage />
+          </ProtectedRoute>
         } />
       </Routes>
     </>

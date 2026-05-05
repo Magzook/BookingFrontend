@@ -3,32 +3,35 @@ import { signUp, confirmSignUp } from '../api/client'
 import styles from './RegisterPage.module.css'
 
 const STATUS_MESSAGES = {
-  '-1': 'Логин имеет неверный формат (1–20 символов: буквы, цифры, - _)',
+  '-1': 'Email имеет неверный формат',
   '-2': 'Пароль должен содержать не менее 8 символов',
-  '-3': 'Email имеет неверный формат',
-  '-4': 'Этот логин уже занят',
-  '-5': 'Этот email уже используется',
+  '-3': 'Фамилия, имя, дата рождения и номер документа обязательны',
+  '-4': 'Этот email уже используется',
 }
 
 const CONFIRM_MESSAGES = {
-  '-1': 'Время действия кода истекло. Зарегистрируйтесь заново',
-  '-2': 'Неверный код подтверждения',
+  '-1': 'Время действия кода истекло. Зарегистрируйтесь заново.',
+  '-2': 'Неверный код подтверждения.',
 }
 
 export default function RegisterPage({ onSuccess, onBack }) {
-  const [step, setStep]           = useState('form') // 'form' | 'confirm'
+  const [step, setStep]                     = useState('form')
   const [registrationId, setRegistrationId] = useState(null)
-  const [email, setEmail]         = useState('')
 
   // form fields
-  const [login, setLogin]         = useState('')
-  const [password, setPassword]   = useState('')
-  const [password2, setPassword2] = useState('')
-  const [formError, setFormError] = useState(null)
-  const [formLoading, setFormLoading] = useState(false)
+  const [email, setEmail]               = useState('')
+  const [password, setPassword]         = useState('')
+  const [password2, setPassword2]       = useState('')
+  const [lastName, setLastName]         = useState('')
+  const [firstName, setFirstName]       = useState('')
+  const [middleName, setMiddleName]     = useState('')
+  const [birthDate, setBirthDate]       = useState('')
+  const [documentNumber, setDocumentNumber] = useState('')
+  const [formError, setFormError]       = useState(null)
+  const [formLoading, setFormLoading]   = useState(false)
 
   // confirm fields
-  const [code, setCode]           = useState('')
+  const [code, setCode]                 = useState('')
   const [confirmError, setConfirmError] = useState(null)
   const [confirmLoading, setConfirmLoading] = useState(false)
 
@@ -43,11 +46,19 @@ export default function RegisterPage({ onSuccess, onBack }) {
 
     setFormLoading(true)
     try {
-      const { registrationId } = await signUp(login, email, password)
+      const { registrationId } = await signUp({
+        email,
+        password,
+        lastName,
+        firstName,
+        middleName,
+        birthDate,
+        documentNumber,
+      })
       setRegistrationId(registrationId)
       setStep('confirm')
     } catch (err) {
-      setFormError(STATUS_MESSAGES[String(err.status)] ?? err.msg)
+      setFormError(STATUS_MESSAGES[String(err.status)] ?? err.msg ?? 'Что-то пошло не так')
     } finally {
       setFormLoading(false)
     }
@@ -62,7 +73,6 @@ export default function RegisterPage({ onSuccess, onBack }) {
       onSuccess()
     } catch (err) {
       if (err.status === -1) {
-        // expired — go back to form
         setStep('form')
         setFormError('Время действия кода истекло. Отправьте данные повторно.')
       } else {
@@ -118,13 +128,56 @@ export default function RegisterPage({ onSuccess, onBack }) {
 
         <form onSubmit={handleSubmitForm} className={styles.form}>
           <label className={styles.label}>
-            Логин
+            Фамилия
             <input
               className={styles.input}
               type="text"
-              value={login}
-              onChange={e => setLogin(e.target.value)}
+              value={lastName}
+              onChange={e => setLastName(e.target.value)}
               autoFocus
+              required
+            />
+          </label>
+
+          <label className={styles.label}>
+            Имя
+            <input
+              className={styles.input}
+              type="text"
+              value={firstName}
+              onChange={e => setFirstName(e.target.value)}
+              required
+            />
+          </label>
+
+          <label className={styles.label}>
+            Отчество
+            <input
+              className={styles.input}
+              type="text"
+              value={middleName}
+              onChange={e => setMiddleName(e.target.value)}
+            />
+          </label>
+
+          <label className={styles.label}>
+            Дата рождения
+            <input
+              className={styles.input}
+              type="date"
+              value={birthDate}
+              onChange={e => setBirthDate(e.target.value)}
+              required
+            />
+          </label>
+
+          <label className={styles.label}>
+            Номер документа
+            <input
+              className={styles.input}
+              type="text"
+              value={documentNumber}
+              onChange={e => setDocumentNumber(e.target.value)}
               required
             />
           </label>

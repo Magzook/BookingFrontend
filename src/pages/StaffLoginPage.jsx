@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { login } from '../api/client'
+import { loginAsStaff } from '../api/client'
 import styles from './LoginPage.module.css'
 
-export default function LoginPage({ onSuccess, onBack }) {
-  const [email, setEmail]       = useState('')
+export default function StaffLoginPage({ onSuccess }) {
+  const [role, setRole]         = useState('hostess')
+  const [loginVal, setLoginVal] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError]       = useState(null)
   const [loading, setLoading]   = useState(false)
@@ -15,11 +16,11 @@ export default function LoginPage({ onSuccess, onBack }) {
     setError(null)
     setLoading(true)
     try {
-      await login(email, password)
-      onSuccess()
+      await loginAsStaff(loginVal, password, role)
+      onSuccess(loginVal, role)
     } catch (err) {
       if (err?.status === -1) {
-        setError('Неверный email или пароль')
+        setError('Неверный логин или пароль')
       } else {
         setError(err?.msg ?? 'Что-то пошло не так')
       }
@@ -31,17 +32,40 @@ export default function LoginPage({ onSuccess, onBack }) {
   return (
     <main className={styles.main}>
       <div className={styles.card}>
-        <button className={styles.back} onClick={onBack}>← Назад</button>
-        <h2 className={styles.title}>Вход</h2>
+        <button className={styles.back} onClick={() => navigate('/sign-in')}>← Назад</button>
+        <h2 className={styles.title}>Вход для персонала</h2>
 
         <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.radioGroup}>
+            <label className={styles.radioLabel}>
+              <input
+                type="radio"
+                name="role"
+                value="hostess"
+                checked={role === 'hostess'}
+                onChange={() => setRole('hostess')}
+              />
+              Хостес
+            </label>
+            <label className={styles.radioLabel}>
+              <input
+                type="radio"
+                name="role"
+                value="admin"
+                checked={role === 'admin'}
+                onChange={() => setRole('admin')}
+              />
+              Администратор
+            </label>
+          </div>
+
           <label className={styles.label}>
-            Email
+            Логин
             <input
               className={styles.input}
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+              type="text"
+              value={loginVal}
+              onChange={e => setLoginVal(e.target.value)}
               autoFocus
               required
             />
@@ -64,16 +88,6 @@ export default function LoginPage({ onSuccess, onBack }) {
             {loading ? 'Входим…' : 'Войти'}
           </button>
         </form>
-
-        <div className={styles.divider} />
-
-        <button className={styles.registerBtn} onClick={() => navigate('/sign-up')}>
-          Зарегистрироваться
-        </button>
-
-        <button className={styles.registerBtn} onClick={() => navigate('/sign-in-as-staff')}>
-          Вход для персонала
-        </button>
       </div>
     </main>
   )
