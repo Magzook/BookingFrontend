@@ -376,7 +376,7 @@
   box-shadow: var(--shadow);
   padding: 28px;
   margin-top: 24px;
-  max-width: 500px;
+  max-width: 900px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -393,6 +393,39 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.formMainRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 768px) {
+  .formMainRow {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+.formLeftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formRightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formRightColumn h3 {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--bark);
+  margin: 0 0 4px;
 }
 
 .formRow {
@@ -473,21 +506,6 @@
   font-weight: 700;
   font-size: 16px;
   color: var(--ember);
-}
-
-.guestFields {
-  background: var(--fog);
-  border-radius: 8px;
-  padding: 16px;
-  margin-top: 8px;
-}
-
-.guestFields h3 {
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--bark);
-  margin: 0 0 12px;
 }
 
 .bookOk {

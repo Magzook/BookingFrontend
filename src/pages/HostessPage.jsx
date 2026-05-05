@@ -429,136 +429,135 @@ const HostessPage = () => {
       <div className={styles.createBookingSection}>
         <h2>Создание брони для незарегистрированного гостя</h2>
         <form onSubmit={handleCreateBooking} className={styles.createBookingForm}>
-          <label className={styles.formLabel}>
-            Помещение
-            <select
-              className={styles.formSelect}
-              value={selectedResourceId}
-              onChange={(e) => setSelectedResourceId(e.target.value)}
-            >
-              {resources.map(r => (
-                <option key={r.id} value={r.id}>{r.name}</option>
-              ))}
-            </select>
-          </label>
+          <div className={styles.formMainRow}>
+            <div className={styles.formLeftColumn}>
+              <label className={styles.formLabel}>
+                Помещение
+                <select
+                  className={styles.formSelect}
+                  value={selectedResourceId}
+                  onChange={(e) => setSelectedResourceId(e.target.value)}
+                >
+                  {resources.map(r => (
+                    <option key={r.id} value={r.id}>{r.name}</option>
+                  ))}
+                </select>
+              </label>
 
-          <label className={styles.formLabel}>
-            Дата
-            <input
-              type="date"
-              className={styles.formInput}
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-            />
-          </label>
-          {!isWorkingDay(selectedDate) && workingDays.length > 0 && (
-            <span className={styles.warningSmall}>Не рабочий день</span>
-          )}
+              <label className={styles.formLabel}>
+                Дата
+              </label>
+              <BookingCalendar workingDays={workingDays} selected={selectedDate} onSelect={setSelectedDate} />
+              {!isWorkingDay(selectedDate) && workingDays.length > 0 && (
+                <span className={styles.warningSmall}>Не рабочий день</span>
+              )}
 
-          <label className={styles.formLabel}>
-            Время начала
-            <select
-              className={styles.formSelect}
-              value={bookingTime}
-              onChange={(e) => setBookingTime(e.target.value)}
-            >
-              {allSlots().map(m => {
-                const timeStr = minsToTime(m);
-                const occupied = isOverlap(m, STEP);
-                return (
-                  <option key={m} value={timeStr} disabled={occupied}>
-                    {timeStr}{occupied ? ' — занято' : ''}
-                  </option>
-                );
-              })}
-            </select>
-          </label>
+              <label className={styles.formLabel}>
+                Время начала
+                <select
+                  className={styles.formSelect}
+                  value={bookingTime}
+                  onChange={(e) => setBookingTime(e.target.value)}
+                >
+                  {allSlots().map(m => {
+                    const timeStr = minsToTime(m);
+                    const occupied = isOverlap(m, STEP);
+                    return (
+                      <option key={m} value={timeStr} disabled={occupied}>
+                        {timeStr}{occupied ? ' — занято' : ''}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
 
-          <label className={styles.formLabel}>
-            Продолжительность
-            {availableDurations.length === 0 ? (
-              <p className={styles.noDur}>Нет доступного времени</p>
-            ) : (
-              <select
-                className={styles.formSelect}
-                value={bookingDuration}
-                onChange={(e) => setBookingDuration(Number(e.target.value))}
-              >
-                {durationsFor(bookingStartMins).map(d => {
-                  const h = Math.floor(d / 60);
-                  const min = d % 60;
-                  const label = h > 0 && min > 0 ? `${h} ч ${min} мин`
-                              : h > 0 ? `${h} ч`
-                              : `${min} мин`;
-                  const occupied = isOverlap(bookingStartMins, d);
-                  return (
-                    <option key={d} value={d} disabled={occupied}>
-                      {label}{occupied ? ' — занято' : ''}
-                    </option>
-                  );
-                })}
-              </select>
-            )}
-          </label>
+              <label className={styles.formLabel}>
+                Продолжительность
+                {availableDurations.length === 0 ? (
+                  <p className={styles.noDur}>Нет доступного времени</p>
+                ) : (
+                  <select
+                    className={styles.formSelect}
+                    value={bookingDuration}
+                    onChange={(e) => setBookingDuration(Number(e.target.value))}
+                  >
+                    {durationsFor(bookingStartMins).map(d => {
+                      const h = Math.floor(d / 60);
+                      const min = d % 60;
+                      const label = h > 0 && min > 0 ? `${h} ч ${min} мин`
+                                  : h > 0 ? `${h} ч`
+                                  : `${min} мин`;
+                      const occupied = isOverlap(bookingStartMins, d);
+                      return (
+                        <option key={d} value={d} disabled={occupied}>
+                          {label}{occupied ? ' — занято' : ''}
+                        </option>
+                      );
+                    })}
+                  </select>
+                )}
+              </label>
 
-          {availableDurations.length > 0 && selectedResource && (
-            <div className={styles.pricePreview}>
-              <span>{bookingTime} — {minsToTime(bookingStartMins + bookingDuration)}</span>
-              <span className={styles.priceAmt}>{price.toLocaleString('ru-RU', { maximumFractionDigits: 0 })} ₽</span>
+              {availableDurations.length > 0 && selectedResource && (
+                <div className={styles.pricePreview}>
+                  <span>{bookingTime} — {minsToTime(bookingStartMins + bookingDuration)}</span>
+                  <span className={styles.priceAmt}>{price.toLocaleString('ru-RU', { maximumFractionDigits: 0 })} ₽</span>
+                </div>
+              )}
             </div>
-          )}
 
-          <div className={styles.guestFields}>
-            <h3>Данные гостя</h3>
-            <label className={styles.formLabel}>
-              Фамилия
-              <input
-                type="text"
-                className={styles.formInput}
-                value={guestData.lastName}
-                onChange={(e) => setGuestData({ ...guestData, lastName: e.target.value })}
-                required
-              />
-            </label>
-            <label className={styles.formLabel}>
-              Имя
-              <input
-                type="text"
-                className={styles.formInput}
-                value={guestData.firstName}
-                onChange={(e) => setGuestData({ ...guestData, firstName: e.target.value })}
-                required
-              />
-            </label>
-            <label className={styles.formLabel}>
-              Отчество
-              <input
-                type="text"
-                className={styles.formInput}
-                value={guestData.middleName}
-                onChange={(e) => setGuestData({ ...guestData, middleName: e.target.value })}
-              />
-            </label>
-            <label className={styles.formLabel}>
-              Дата рождения
-              <input
-                type="date"
-                className={styles.formInput}
-                value={guestData.birthDate}
-                onChange={(e) => setGuestData({ ...guestData, birthDate: e.target.value })}
-                required
-              />
-            </label>
-            <label className={styles.formLabel}>
-              Номер документа
-              <input
-                type="text"
-                className={styles.formInput}
-                value={guestData.documentNumber}
-                onChange={(e) => setGuestData({ ...guestData, documentNumber: e.target.value })}
-                required
-              />
-            </label>
+            <div className={styles.formRightColumn}>
+              <h3>Данные гостя</h3>
+              <label className={styles.formLabel}>
+                Фамилия
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={guestData.lastName}
+                  onChange={(e) => setGuestData({ ...guestData, lastName: e.target.value })}
+                  required
+                />
+              </label>
+              <label className={styles.formLabel}>
+                Имя
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={guestData.firstName}
+                  onChange={(e) => setGuestData({ ...guestData, firstName: e.target.value })}
+                  required
+                />
+              </label>
+              <label className={styles.formLabel}>
+                Отчество
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={guestData.middleName}
+                  onChange={(e) => setGuestData({ ...guestData, middleName: e.target.value })}
+                />
+              </label>
+              <label className={styles.formLabel}>
+                Дата рождения
+                <input
+                  type="date"
+                  className={styles.formInput}
+                  value={guestData.birthDate}
+                  onChange={(e) => setGuestData({ ...guestData, birthDate: e.target.value })}
+                  required
+                />
+              </label>
+              <label className={styles.formLabel}>
+                Номер документа
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={guestData.documentNumber}
+                  onChange={(e) => setGuestData({ ...guestData, documentNumber: e.target.value })}
+                  required
+                />
+              </label>
+            </div>
           </div>
 
           {bookingMsg && (
