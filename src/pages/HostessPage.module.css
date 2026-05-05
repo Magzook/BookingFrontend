@@ -363,3 +363,149 @@
   border-radius: 6px;
   padding: 8px 12px;
 }
+
+/* ── Create booking section ── */
+.createBookingSection {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  margin-top: 24px;
+}
+
+.createBookingSection h2 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--bark);
+  margin: 0 0 20px;
+}
+
+.createBookingForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formRowTwo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .formRowTwo {
+    grid-template-columns: 1fr;
+  }
+}
+
+.formLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+
+.formSelect, .formInput {
+  padding: 10px 12px;
+  border: 1.5px solid var(--steam);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--bark);
+  background: var(--fog);
+  outline: none;
+  cursor: pointer;
+  transition: border-color .2s;
+}
+
+.formSelect:focus, .formInput:focus {
+  border-color: var(--amber);
+}
+
+.formInput[type="date"] {
+  cursor: pointer;
+}
+
+.warningSmall {
+  color: #c0392b;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  background: #fdecea;
+  padding: 4px 10px;
+  border-radius: 6px;
+  align-self: flex-start;
+}
+
+.noDur {
+  font-size: 13px;
+  color: #c0392b;
+  margin: 4px 0 0;
+}
+
+.guestFields {
+  background: var(--fog);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 8px;
+}
+
+.guestFields h3 {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--bark);
+  margin: 0 0 12px;
+}
+
+.bookOk {
+  font-size: 13px;
+  color: #27ae60;
+  background: #eafaf1;
+  border-radius: 6px;
+  padding: 10px 12px;
+  line-height: 1.5;
+}
+
+.bookErr {
+  font-size: 13px;
+  color: #c0392b;
+  background: #fdecea;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.bookSubmit {
+  background: var(--ember);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 13px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s;
+  margin-top: 4px;
+}
+
+.bookSubmit:hover:not(:disabled) {
+  background: var(--amber);
+}
+
+.bookSubmit:disabled {
+  opacity: .6;
+  cursor: default;
+}

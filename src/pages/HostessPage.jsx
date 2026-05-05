@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getHostessBookingsByDay, getWorkingDays, cancelHostessBooking } from '../api/client';
+import { getHostessBookingsByDay, getWorkingDays, cancelHostessBooking, getResources, createHostessBooking, getResource } from '../api/client';
 import styles from './HostessPage.module.css';
 
 const HostessPage = () => {
@@ -12,6 +12,23 @@ const HostessPage = () => {
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [cancelError, setCancelError] = useState(null);
   const [cancelLoading, setCancelLoading] = useState(false);
+
+  // States for booking form
+  const [resources, setResources] = useState([]);
+  const [selectedResourceId, setSelectedResourceId] = useState('');
+  const [resourceBookings, setResourceBookings] = useState([]);
+  const [bookingTime, setBookingTime] = useState('09:00');
+  const [bookingDuration, setBookingDuration] = useState(60);
+  const [guestData, setGuestData] = useState({
+    lastName: '',
+    firstName: '',
+    middleName: '',
+    birthDate: '',
+    documentNumber: ''
+  });
+  const [bookingMsg, setBookingMsg] = useState(null);
+  const [bookingOk, setBookingOk] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
 
   // Константы времени: с 09:00 до 22:00
   const START_HOUR = 9;
@@ -74,7 +91,7 @@ const HostessPage = () => {
   };
 
   // Собираем уникальные ресурсы из броней
-  const resources = React.useMemo(() => {
+  const resourcesFromBookings = React.useMemo(() => {
     const map = new Map();
     bookings.forEach(b => {
       if (!map.has(b.resource.id)) {
@@ -84,14 +101,45 @@ const HostessPage = () => {
     return Array.from(map.values());
   }, [bookings]);
 
+  // Fetch all resources on mount
+  useEffect(() => {
+    const fetchResources = async () => {
+      try {
+        const data = await getResources();
+        setResources(data);
+        if (data.length > 0 && !selectedResourceId) {
+          setSelectedResourceId(String(data[0].id));
+        }
+      } catch (err) {
+        // ignore
+      }
+    };
+    fetchResources();
+  }, []);
+
+  // Fetch resource bookings when selected resource or date changes
+  useEffect(() => {
+    if (!selectedResourceId) return;
+    const fetchResourceBookings = async () => {
+      try {
+        const data = await getResource(selectedResourceId);
+        const dayEntry = data.all_bookings?.find(b => b.day === selectedDate);
+        setResourceBookings(dayEntry?.bookings ?? []);
+      } catch (err) {
+        setResourceBookings([]);
+      }
+    };
+    fetchResourceBookings();
+  }, [selectedResourceId, selectedDate]);
+
   const renderGrid = () => {
     if (loading) return <div className={styles.loading}>Загрузка...</div>;
     if (error) return <div className={styles.error}>{error}</div>;
-    if (resources.length === 0) return <div className={styles.empty}>Нет бронирований на этот день</div>;
+    if (resourcesFromBookings.length === 0) return <div className={styles.empty}>Нет бронирований на этот день</div>;
 
     // Создаём карту заполненности: resourceId -> массив слотов
     const gridMap = {};
-    resources.forEach(res => {
+    resourcesFromBookings.forEach(res => {
       gridMap[res.id] = new Array(TOTAL_SLOTS).fill(null);
     });
 
@@ -144,7 +192,7 @@ const HostessPage = () => {
             </tr>
           </thead>
           <tbody>
-            {resources.map(resource => {
+            {resourcesFromBookings.map(resource => {
               const rowCells = [];
               let i = 0;
               while (i < TOTAL_SLOTS) {
@@ -218,6 +266,97 @@ const HostessPage = () => {
       setCancelLoading(false);
     }
   };
+
+  // ── Booking form helpers ───────────────────────────────────────────────
+  const WORK_START = 9 * 60;  // 09:00 in minutes
+  const WORK_END = 22 * 60;   // 22:00 in minutes
+  const STEP = 15;
+
+  function minsToTime(m) {
+    return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+  }
+
+  function timeToMins(t) {
+    const [h, min] = t.split(':').map(Number);
+    return h * 60 + min;
+  }
+
+  function allSlots() {
+    const slots = [];
+    for (let m = WORK_START; m < WORK_END; m += STEP) slots.push(m);
+    return slots;
+  }
+
+  function durationsFor(startMins) {
+    const maxMins = WORK_END - startMins;
+    const result = [];
+    for (let d = STEP; d <= maxMins; d += STEP) result.push(d);
+    return result;
+  }
+
+  function isOverlap(startM, durM) {
+    const endM = startM + durM;
+    return resourceBookings.some(b => {
+      const bs = timeToMins(b.time_from);
+      const be = bs + b.duration_minutes;
+      return startM < be && endM > bs;
+    });
+  }
+
+  const bookingStartMins = timeToMins(bookingTime);
+  const availableDurations = durationsFor(bookingStartMins).filter(d => !isOverlap(bookingStartMins, d));
+  const currentDurationOk = !isOverlap(bookingStartMins, bookingDuration);
+
+  useEffect(() => {
+    if (availableDurations.length > 0 && !currentDurationOk) {
+      setBookingDuration(availableDurations[0]);
+    }
+  }, [bookingTime, selectedDate, selectedResourceId]);
+
+  const selectedResource = resources.find(r => String(r.id) === selectedResourceId);
+  const price = selectedResource ? selectedResource.pricePerHour * bookingDuration / 60 : 0;
+
+  async function handleCreateBooking(e) {
+    e.preventDefault();
+    setBookingLoading(true);
+    setBookingMsg(null);
+    setBookingOk(false);
+    try {
+      const bookingData = {
+        lastName: guestData.lastName,
+        firstName: guestData.firstName,
+        middleName: guestData.middleName,
+        birthDate: guestData.birthDate,
+        documentNumber: guestData.documentNumber,
+        day: selectedDate,
+        timeFrom: bookingTime + ':00',
+        durationMinutes: bookingDuration
+      };
+      await createHostessBooking(selectedResourceId, bookingData);
+      setBookingOk(true);
+      setBookingMsg('Бронь успешно создана!');
+      // Reset form
+      setGuestData({ lastName: '', firstName: '', middleName: '', birthDate: '', documentNumber: '' });
+      setBookingTime('09:00');
+      setBookingDuration(60);
+      // Refresh bookings grid
+      const data = await getHostessBookingsByDay(selectedDate);
+      setBookings(data);
+    } catch (err) {
+      setBookingOk(false);
+      const ERRORS = {
+        '-1': 'Этот день не является рабочим',
+        '-2': 'Выбранное время пересекается с существующей бронью',
+        '-3': 'Время должно быть кратно 15 минутам',
+        '-4': 'Время должно быть в диапазоне 09:00–21:45',
+        '-5': 'Продолжительность должна быть кратна 15 минутам',
+        '-6': 'Бронь должна закончиться до 22:00',
+      };
+      setBookingMsg(ERRORS[String(err.status)] ?? err.msg ?? 'Ошибка');
+    } finally {
+      setBookingLoading(false);
+    }
+  }
 
   return (
     <div className={styles.hostessPage}>
@@ -293,6 +432,166 @@ const HostessPage = () => {
           </div>
         </div>
       )}
+
+      {/* ── Create booking for unregistered guest ─────────────────────────── */}
+      <div className={styles.createBookingSection}>
+        <h2>Создание брони для незарегистрированного гостя</h2>
+        <form onSubmit={handleCreateBooking} className={styles.createBookingForm}>
+          <div className={styles.formRow}>
+            <label className={styles.formLabel}>
+              Помещение
+              <select
+                className={styles.formSelect}
+                value={selectedResourceId}
+                onChange={(e) => setSelectedResourceId(e.target.value)}
+              >
+                {resources.map(r => (
+                  <option key={r.id} value={r.id}>{r.name}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className={styles.formRow}>
+            <label className={styles.formLabel}>
+              Дата
+              <input
+                type="date"
+                className={styles.formInput}
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+              />
+            </label>
+            {!isWorkingDay(selectedDate) && workingDays.length > 0 && (
+              <span className={styles.warningSmall}>Не рабочий день</span>
+            )}
+          </div>
+
+          <div className={styles.formRowTwo}>
+            <label className={styles.formLabel}>
+              Время начала
+              <select
+                className={styles.formSelect}
+                value={bookingTime}
+                onChange={(e) => setBookingTime(e.target.value)}
+              >
+                {allSlots().map(m => {
+                  const timeStr = minsToTime(m);
+                  const occupied = isOverlap(m, STEP);
+                  return (
+                    <option key={m} value={timeStr} disabled={occupied}>
+                      {timeStr}{occupied ? ' — занято' : ''}
+                    </option>
+                  );
+                })}
+              </select>
+            </label>
+
+            <label className={styles.formLabel}>
+              Продолжительность
+              {availableDurations.length === 0 ? (
+                <p className={styles.noDur}>Нет доступного времени</p>
+              ) : (
+                <select
+                  className={styles.formSelect}
+                  value={bookingDuration}
+                  onChange={(e) => setBookingDuration(Number(e.target.value))}
+                >
+                  {durationsFor(bookingStartMins).map(d => {
+                    const h = Math.floor(d / 60);
+                    const min = d % 60;
+                    const label = h > 0 && min > 0 ? `${h} ч ${min} мин`
+                                : h > 0 ? `${h} ч`
+                                : `${min} мин`;
+                    const occupied = isOverlap(bookingStartMins, d);
+                    return (
+                      <option key={d} value={d} disabled={occupied}>
+                        {label}{occupied ? ' — занято' : ''}
+                      </option>
+                    );
+                  })}
+                </select>
+              )}
+            </label>
+          </div>
+
+          {availableDurations.length > 0 && selectedResource && (
+            <div className={styles.pricePreview}>
+              <span>{bookingTime} — {minsToTime(bookingStartMins + bookingDuration)}</span>
+              <span className={styles.priceAmt}>{price.toLocaleString('ru-RU', { maximumFractionDigits: 0 })} ₽</span>
+            </div>
+          )}
+
+          <div className={styles.guestFields}>
+            <h3>Данные гостя</h3>
+            <div className={styles.formRowTwo}>
+              <label className={styles.formLabel}>
+                Фамилия
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={guestData.lastName}
+                  onChange={(e) => setGuestData({ ...guestData, lastName: e.target.value })}
+                  required
+                />
+              </label>
+              <label className={styles.formLabel}>
+                Имя
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={guestData.firstName}
+                  onChange={(e) => setGuestData({ ...guestData, firstName: e.target.value })}
+                  required
+                />
+              </label>
+            </div>
+            <label className={styles.formLabel}>
+              Отчество
+              <input
+                type="text"
+                className={styles.formInput}
+                value={guestData.middleName}
+                onChange={(e) => setGuestData({ ...guestData, middleName: e.target.value })}
+              />
+            </label>
+            <div className={styles.formRowTwo}>
+              <label className={styles.formLabel}>
+                Дата рождения
+                <input
+                  type="date"
+                  className={styles.formInput}
+                  value={guestData.birthDate}
+                  onChange={(e) => setGuestData({ ...guestData, birthDate: e.target.value })}
+                  required
+                />
+              </label>
+              <label className={styles.formLabel}>
+                Номер документа
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={guestData.documentNumber}
+                  onChange={(e) => setGuestData({ ...guestData, documentNumber: e.target.value })}
+                  required
+                />
+              </label>
+            </div>
+          </div>
+
+          {bookingMsg && (
+            <p className={bookingOk ? styles.bookOk : styles.bookErr}>{bookingMsg}</p>
+          )}
+
+          <button
+            type="submit"
+            className={styles.bookSubmit}
+            disabled={bookingLoading || !selectedResourceId || !selectedDate || availableDurations.length === 0}
+          >
+            {bookingLoading ? 'Бронируем…' : 'Забронировать'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
