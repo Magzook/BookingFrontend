@@ -263,3 +263,15 @@ export async function getHostessBookingsByDay(date) {
   }
   return res.json()
 }
+
+export async function createHostessBooking(resourceId, bookingData) {
+  const res = await fetch(`${BASE}/hostess/bookings?resourceId=${resourceId}`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(bookingData)
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw { status: data.status, msg: data.msg }
+  return data
+}
