@@ -17,7 +17,7 @@
 /* ── Controls ── */
 .controls {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
   background: var(--white);
   padding: 16px 20px;
@@ -29,6 +29,11 @@
   color: var(--ash);
   letter-spacing: .04em;
   text-transform: uppercase;
+  flex-wrap: wrap;
+}
+
+.dateLabel {
+  padding: 8px 0;
 }
 
 .controls input[type="date"] {
@@ -371,6 +376,9 @@
   box-shadow: var(--shadow);
   padding: 28px;
   margin-top: 24px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .createBookingSection h2 {
@@ -394,15 +402,9 @@
 }
 
 .formRowTwo {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 16px;
-}
-
-@media (max-width: 600px) {
-  .formRowTwo {
-    grid-template-columns: 1fr;
-  }
 }
 
 .formLabel {
@@ -453,6 +455,24 @@
   font-size: 13px;
   color: #c0392b;
   margin: 4px 0 0;
+}
+
+.pricePreview {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--bark);
+  background: var(--fog);
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.priceAmt {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ember);
 }
 
 .guestFields {
